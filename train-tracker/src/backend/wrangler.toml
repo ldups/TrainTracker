@@ -1,4 +1,4 @@
-name = "amtrak-proxy"
+name = "dups-amtrak"
 main = "server.js"
-compatibility_date = "2024-11-08"
-account_id = "301208bb8e22fe17b4ac6baa241fe11b"
+compatibility_date = "2024-11-19"
+account_id = "0ab5bf139cb9c7ca409f8997a034729f"
