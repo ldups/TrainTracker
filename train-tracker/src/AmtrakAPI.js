@@ -1,85 +1,55 @@
-//Client-Side Objects and Functions for reading/manipulating decoded data returned from server
-
 const API_HOST = process.env.REACT_APP_API_HOST;
 
-/**
- * Represents a Stop as seen by a Train
- * found in a train's {@link Train.stations} member
- * @constructor
- * */
-function Stop() {
-    this.stationCode = null;
-    // this.getStationName = function(){
-        //use table to convert from 3-letter codes
-    // }
+class Stop {
+    constructor() {
+        this.stationCode = null;
 
-    this.hasArrived = false;
-    this.hasDeparted = false;
+        this.hasArrived = false;
+        this.hasDeparted = false;
 
-    //if hasDeparted and/or hasArrived are false, departureTime and arrivalTime are estimates
+        this.arrivalTime = null;
+        this.departureTime = null;
 
-    this.arrivalTime = null;
-    this.departureTime = null;
-
-    this.arrivalPunctuality = null;
-    this.departurePunctuality = null;
-}
-
-/**
- * represents a station
- * @constructor
- */
-function Station() {
-    this.stationCode = null;
-    this.name = null;
-
-    this.addr1 = null;
-    this.addr2 = null;
-    this.city = null;
-    this.state = null;
-    this.zip = null;
-
-    this.lat = null;
-    this.lon = null;
-}
-
-/**
- * Information about a train, including:
- * list of scheduled [stops]{@link Stop}
- * train number
- * speed,
- * heading,
- * punctuality,
- * route name,
- * etc.
- *
- * will include helper functions to determine gps coords, eta for a given station name, etc.
- * @constructor
- */
-function Train() {
-    this.number = null;
-    this.routeName = null;
-    this.from = null;
-    this.to = null;
-    this.speed = null;
-    this.heading = null;
-    this.lastUpdate = null;
-    this.lastVisitedStation = null;
-    this.punctuality = null;
-    this.lat = null;
-    this.lon = null;
-    this.state = null;
-    this.stations = [];//of type Stop[]
-    this.toString = function () {
-        return this.routeName + " Train #" + this.number +
-            "\nGoing " + Math.trunc(this.speed) + " Mph Heading " + this.heading + " from " + this.from + " to " + this.to +
-            "\nReported running " + this.punctuality + " by most recently visited stop " + this.lastVisitedStation +
-            "\nLat: " + this.lat + " Lon: " + this.lon +
-            "\nStation List: " + this.stations.map(station => station.stationCode).join(", ");
+        this.arrivalPunctuality = null;
+        this.departurePunctuality = null;
     }
 }
 
-function stationFromRaw(data) {
+class Station {
+    constructor() {
+        this.stationCode = null;
+        this.name = null;
+
+        this.addr1 = null;
+        this.addr2 = null;
+        this.city = null;
+        this.state = null;
+        this.zip = null;
+
+        this.lat = null;
+        this.lon = null;
+    }
+}
+
+class Train {
+    constructor() {
+        this.number = null;
+        this.routeName = null;
+        this.from = null;
+        this.to = null;
+        this.speed = null;
+        this.heading = null;
+        this.lastUpdate = null;
+        this.lastVisitedStation = null;
+        this.punctuality = null;
+        this.lat = null;
+        this.lon = null;
+        this.state = null;
+        this.stations = []; //of type Stop[]
+    }
+}
+
+export function stationFromRaw(data) {
     const station = new Station();
 
     station.stationCode = data.Code;
@@ -95,73 +65,26 @@ function stationFromRaw(data) {
     return station;
 }
 
-/**
- * For managing data from amtrak api
- * includes functions like getting filtered lists of trains, updating data
- * @constructor
- */
-function APIInstance() {
-    this.lastUpdate = null;
-    this.trains = null;
-    this.routes = null;
-    this.stations = null;
-
-    /**
-     * user-defined function gets called when dataset is updated
-     */
-    this.onUpdated = function(){};
-    this.update = function() {
-        if(this.routes === null) {
-            getRoutesJSONData().then(data => {
-                this.routes = data;
-                if(this.trains !== null && this.stations !== null) {
-                    this.onUpdated()
-                }
-            })
-        }
-        if(this.stations === null) {
-            getStationsJSONData().then(data => {
-                this.stations = data.StationsDataResponse.features.map(m => stationFromRaw(m.properties));
-                if(this.trains !== null && this.routes !== null) {
-                    this.onUpdated()
-                }
-            })
-        }
-        getTrainList().then(data => {
-            this.trains = data;
-            this.lastUpdate = Date.now();
-            if(this.routes !== null && this.stations !== null) {
-                this.onUpdated();
-            }
-        })
-    }
-
-    this.getStationInfo = function(stationCode) {
-        return this.stations.find(station => station.Code === stationCode);
-    }
-}
-
-
 async function getTrainsJSONData() {
     return fetch(API_HOST + "/getTrains").then(
         res => res.json()
     )
 }
 
-async function getRoutesJSONData() {
+export async function getRoutesJSONData() {
     return fetch(API_HOST + "/getRoutes").then(
         res => res.json()
     )
 }
 
-async function getStationsJSONData() {
+export async function getStationsJSONData() {
     return fetch(API_HOST + "/getStations").then(
         res => res.json()
     )
 }
 
 
-async function getTrainList() {
+export async function getTrainList() {
     let apiData = await getTrainsJSONData();
 
     let trainList = new Array(apiData.features.length);
@@ -236,11 +159,4 @@ async function getTrainList() {
     }
 
     return trainList;
-}
-
-module.exports = {
-    Station,
-    Stop,
-    Train,
-    APIInstance
 }

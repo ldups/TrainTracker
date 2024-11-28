@@ -1,5 +1,5 @@
 import './styles/App.css';
-import Amtrak from './AmtrakAPI';
+import {getRoutesJSONData, getStationsJSONData, getTrainList, stationFromRaw} from './AmtrakAPI';
 import train_icon from './images/train_icon.png';
 import React, {useState, useEffect} from 'react'
 import { Link, Routes, Route, HashRouter, useNavigate } from 'react-router-dom';
@@ -10,9 +10,6 @@ import TrainPage, {TrainForm} from './TrainPage';
 import { getClosestStation } from './functionality/app';
 
 function App() {
-    // load api data
-    const api = new Amtrak.APIInstance();
-
     const [userLocation, setUserLocation] = useState(null);
     const [selectedStation, setSelectedStation] = useState("");
     const [selectedRoute, setSelectedRoute] = useState("");
@@ -22,13 +19,23 @@ function App() {
     const [allStations, setAllStations] = useState([]);
 
     useEffect(() => {
-        api.onUpdated = function() {
-            setAllTrains(this.trains);
-            setAllRoutes(this.routes);
-            setAllStations(this.stations);
+        async function getRoutes(){
+            const routes = await getRoutesJSONData();
+            setAllRoutes(routes);
         }
-        api.update();
-
+        
+        async function getStations(){
+            const stations = await getStationsJSONData();
+            setAllStations(stations.StationsDataResponse.features.map(m => stationFromRaw(m.properties)));
+        }
+        
+        async function getTrains(){
+            const trains = await getTrainList();
+            setAllTrains(trains);
+        }
+        getRoutes();
+        getStations();
+        getTrains();
     },[]);
 
     useEffect(() => {
