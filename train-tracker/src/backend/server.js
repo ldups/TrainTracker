@@ -28,16 +28,13 @@ async function getDecryptedJSONData(url) {
     const rawDataBase64 = await fetch(url)
         .then(
             res => res.text()
-        );//get raw data
+        );
 
     const encryptedTrainData = Uint8Array.from(atob(rawDataBase64.slice(0, -PASSWORD_LENGTH)), m => m.charCodeAt(0));
     const encryptedPasswordFragments = Uint8Array.from(atob(rawDataBase64.slice(-PASSWORD_LENGTH)), m => m.charCodeAt(0));
 
     if(cryptoParams === null) {
         //Taken And Modified from mgwalker
-
-        // First, the index of the public key is the sum of all zoom levels for all
-        // routes, so let's get that real quick.
         const masterZoom = await fetch(
             "https://maps.amtrak.com/rttl/js/RoutesList.json",
         )
@@ -46,16 +43,12 @@ async function getDecryptedJSONData(url) {
                 list.reduce((sum, { ZoomLevel }) => sum + (ZoomLevel ?? 0), 0),
             );
 
-        // Then fetch the data containing our values.
         const cryptoData = await fetch(
             "https://maps.amtrak.com/rttl/js/RoutesList.v.json",
         ).then((r) => r.json());
 
-        // And pull them out.
         cryptoParams = {
             publicKey: cryptoData.arr[masterZoom],
-            // The salt and IV indices are equal to the length of any given value in the
-            // array. So if salt[0] is 8 bytes long, then our value is at salt[8]. Etc.
             salt: fromHex(cryptoData.s[cryptoData.s[0].length]),
             iv: fromHex(cryptoData.v[cryptoData.v[0].length]),
         };
