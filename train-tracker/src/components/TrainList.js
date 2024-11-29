@@ -1,7 +1,9 @@
 import React from 'react';
-import './styles/TrainList.css';
+import '../styles/TrainList.css';
+import {useCurrentTrains} from '../hooks/CurrentTrainsStore';
 
-function TrainList({trains, handleTrainClick}){
+function TrainList({handleTrainClick}){
+    const trains = useCurrentTrains();
 
     function MakeTrain({train}){
         const status = train.punctuality?.replace('MI', 'min.').replace('HR', 'hr.').toLowerCase();

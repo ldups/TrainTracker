@@ -7,7 +7,11 @@ import { FaLocationDot } from "react-icons/fa6";
 import { FaBuildingUser } from "react-icons/fa6";
 import { renderToString } from "react-dom/server";
 import colormap from "colormap";
-import './styles/Map.css';
+import '../styles/Map.css';
+import {useRoute, useStation} from '../hooks/SearchStore';
+import {useStations} from '../hooks/DataStore';
+import {useCurrentTrains} from '../hooks/CurrentTrainsStore';
+import {convertStationCodeToStation} from '../functionality/app.js';
 
 // Fix default icon issue
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -22,14 +26,16 @@ L.Icon.Default.mergeOptions({
     shadowUrl: markerShadow,
 });
 
-const TrainMap = ({trains, userLocation, selectedStation, selectedRoute}) => {
+const TrainMap = ({userLocation}) => {
     const [railLines, setRailLines] = useState(null);
     const [stations, setStations] = useState(null);
     const [routes, setRoutes] = useState(null);
-    // const [trains, setTrains] = useState([]);
-    // const [trainColors, setTrainColors] = useState({}); // Commented out trainColors state
-    // const apiInstance = useRef(new APIInstance());
     const mapRef = useRef();
+
+    const selectedRoute = useRoute();
+    const allStations = useStations();
+    const selectedStation = convertStationCodeToStation(allStations, useStation());
+    const trains = useCurrentTrains();
 
     useEffect(() => {
         fetch("/TrainTracker/geojson/amtrak-track.geojson")
@@ -55,46 +61,6 @@ const TrainMap = ({trains, userLocation, selectedStation, selectedRoute}) => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    const updateTrainData = () => {
-        // removed update button functionality temporarily
-        //apiInstance.current.update();
-        //setTrains(apiInstance.current.trains || []);
-    };
-
-        // Commented out the logic for assigning random colors
-        /*
-        setTrainColors(prevColors => {
-            const updatedColors = { ...prevColors };
-            newTrains.forEach(train => {
-                if (!updatedColors[train.number]) {
-                    updatedColors[train.number] = getRandomColor();
-                }
-            });
-            return updatedColors;
-        });
-        */
-
-    /*useEffect(() => {
-        apiInstance.current.onUpdated = updateTrainData;
-        updateTrainData();
-        const intervalId = setInterval(updateTrainData, 600000);
-
-        return () => clearInterval(intervalId);
-    }, []);*/
-
-    // Commented out getRandomColor function
-    /*
-    const getRandomColor = () => {
-        const letters = '0123456789ABCDEF';
-        let color = '#';
-        for (let i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-    };
-    */
-
-    // Apply a static blue color to TrainIcon
     const TrainIcon = () => (
         <div className="custom-icon-container" style={{ color: "blue" }}>
             <IoTrainOutline size={20} />
@@ -238,7 +204,6 @@ const TrainMap = ({trains, userLocation, selectedStation, selectedRoute}) => {
 
     return (
         <>
-        <button onClick={updateTrainData}>Refresh Trains</button>
         <MapContainer
             ref={mapRef}
             center={[39.8283, -98.5795]}

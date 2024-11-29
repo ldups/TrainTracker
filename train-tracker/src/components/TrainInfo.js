@@ -1,5 +1,5 @@
-import './styles/TrainInfo.css'
-import { setToCache, removeFromCache, isFavorited } from './LocalCache';
+import '../styles/TrainInfo.css'
+import { setToCache, removeFromCache, isFavorited } from '../backend/LocalCache';
 import { MdFavoriteBorder } from "react-icons/md";
 
 function TrainInfo({train}){

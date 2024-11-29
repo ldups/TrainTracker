@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom";
 import {useEffect} from 'react';
 import {Link} from 'react-router-dom';
-import './styles/TrainPopup.css'
+import '../styles/TrainPopup.css'
 import TrainInfo from "./TrainInfo";
 
 function TrainPopup({onClose, children, actionBar, train}){

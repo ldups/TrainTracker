@@ -1,13 +1,46 @@
-import './styles/Search.css';
+import '../styles/Search.css';
 import {useState} from 'react'
 
 import { IoSearch } from "react-icons/io5";
 import { MdClear } from "react-icons/md";
-import { getLocalCache } from './LocalCache';
+import { getLocalCache } from '../backend/LocalCache';
+
+import {filterTrains} from '../functionality/app.js'
+
+import {useRoutes, useStations, useTrains} from '../hooks/DataStore';
+import {useSetCurrentTrains} from '../hooks/CurrentTrainsStore'
+import {useNumber, useSetNumber, useRoute, useSetRoute, useStation, useSetStation} from '../hooks/SearchStore';
 
 
-function Search({searchFun, routes, stations, setSelectedStation, selectedStation, selectedRoute, setSelectedRoute}){
-    const [selectedNumber, setSelectedNumber] = useState("");
+function Search(){
+    const stations = useStations();
+    const routes = useRoutes();
+    const allTrains = useTrains();
+    const setCurrentTrains = useSetCurrentTrains();
+
+    const selectedNumber = useNumber();
+    const setSelectedNumber = useSetNumber();
+    const selectedRoute = useRoute();
+    const setSelectedRoute = useSetRoute();
+    const selectedStation = useStation();
+    const setSelectedStation = useSetStation();
+
+    const getStationOptions = () => {
+        let renderedStations = stations.map(station => {
+            return <option value={station.stationCode} key={station.stationCode}>{station.stationCode} - {station.name}</option>
+        })
+        renderedStations.unshift(<option value={""} key={""}>{}</option>);
+        return renderedStations;
+    }
+
+    const getRouteOptions = () => {
+        let renderedRoutes = routes.sort((a, b) => (a.Name).localeCompare(b.Name)).map(route => {
+            return <option value={route.Name} key={route.Name}>{route.Name}</option>
+        });
+        renderedRoutes.unshift(<option value={""} key={""}></option>);
+        return renderedRoutes;
+    }
+
     const [upcoming, setUpcoming] = useState(false);
     const [fromStation, setFromStation] = useState("");
     const [toStation, setToStation] = useState("");
@@ -19,11 +52,17 @@ function Search({searchFun, routes, stations, setSelectedStation, selectedStatio
     function handleUpcoming(e){ setUpcoming(e.target.checked); }
     function handleFromStation(e){ setFromStation(e.target.value); }
     function handleToStation(e){ setToStation(e.target.value); }
+
+    const searchTrains = (selectedNumber, selectedRoute, selectedStation, upcoming, fromStation, toStation) => {
+        let trains = filterTrains(allTrains, selectedNumber, selectedRoute, selectedStation, upcoming, fromStation, toStation);
+
+        setCurrentTrains(trains);
+    }
     
     function handleFavoriteSelection(e){
         addToFavList(populateFavDrop())
         e.preventDefault();
-        searchFun("", e.target.value, "", "", "", "")
+        searchTrains("", e.target.value, "", "", "", "")
     }
 
     function populateFavDrop(){
@@ -36,11 +75,9 @@ function Search({searchFun, routes, stations, setSelectedStation, selectedStatio
         return mapping
     }
 
-    
-
     const search = (event) =>{
         event.preventDefault();
-        searchFun(selectedNumber, selectedRoute, selectedStation, upcoming, fromStation, toStation);
+        searchTrains(selectedNumber, selectedRoute, selectedStation, upcoming, fromStation, toStation);
     }
 
     const clearSearch = () => {
@@ -63,10 +100,10 @@ function Search({searchFun, routes, stations, setSelectedStation, selectedStatio
                     </span>
                 <span className="select-label">
                         Route:
-                        <select className="select-box" value={selectedRoute} onChange={handleRoute} children={routes}></select>
+                        <select className="select-box" value={selectedRoute} onChange={handleRoute} children={getRouteOptions()}></select>
                     </span>
                 <span className="select-label">By station: </span>
-                    <select className='select-box' value={selectedStation} onChange={handleStation} children={stations}></select>
+                    <select className='select-box' value={selectedStation} onChange={handleStation} children={getStationOptions()}></select>
                     <span className="select-label">
                         Upcoming trains only: 
                         <input checked={upcoming} onChange={handleUpcoming} type="checkbox" ></input>
@@ -76,11 +113,11 @@ function Search({searchFun, routes, stations, setSelectedStation, selectedStatio
                     Optional criteria:
                     <span className="select-label">
                         From:
-                        <select className="select-box" value={fromStation} onChange={handleFromStation} children={stations}></select>
+                        <select className="select-box" value={fromStation} onChange={handleFromStation} children={getStationOptions()}></select>
                     </span>
                     <span className="select-label">
                         To:
-                        <select className="select-box" value={toStation} onChange={handleToStation} children={stations}></select>
+                        <select className="select-box" value={toStation} onChange={handleToStation} children={getStationOptions()}></select>
                     </span>
                 </label>
 

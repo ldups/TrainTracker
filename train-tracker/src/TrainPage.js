@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import {Link, useNavigate, useLocation} from 'react-router-dom';
 import { filterTrainPage } from './functionality/app';
-import TrainInfo from './TrainInfo';
+import TrainInfo from './components/TrainInfo';
 
 function TrainPage({allTrains}){
     const location = useLocation();

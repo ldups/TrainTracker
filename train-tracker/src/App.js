@@ -1,22 +1,26 @@
 import './styles/App.css';
-import {getRoutesJSONData, getStationsJSONData, getTrainList, stationFromRaw} from './AmtrakAPI';
+import {getRoutesJSONData, getStationsJSONData, getTrainList, stationFromRaw} from './backend/AmtrakAPI';
 import train_icon from './images/train_icon.png';
 import React, {useState, useEffect} from 'react'
 import { Link, Routes, Route, HashRouter, useNavigate } from 'react-router-dom';
+import {useTrains, useSetTrains, useSetRoutes, useStations, useSetStations} from './hooks/DataStore';
+import {useSetStation} from './hooks/SearchStore';
 
 import Home from './Home';
-import TrainPage, {TrainForm} from './TrainPage';
+import TrainPage from './TrainPage';
 
 import { getClosestStation } from './functionality/app';
 
 function App() {
     const [userLocation, setUserLocation] = useState(null);
-    const [selectedStation, setSelectedStation] = useState("");
-    const [selectedRoute, setSelectedRoute] = useState("");
 
-    const [allTrains, setAllTrains] = useState([]);
-    const [allRoutes, setAllRoutes] = useState([]);
-    const [allStations, setAllStations] = useState([]);
+    const allTrains = useTrains();
+    const setAllTrains = useSetTrains();
+    const setAllRoutes = useSetRoutes();
+    const allStations = useStations();
+    const setAllStations = useSetStations();
+
+    const setSelectedStation = useSetStation();
 
     useEffect(() => {
         async function getRoutes(){
@@ -72,14 +76,7 @@ function App() {
     }
   
     const HomePage = <Home
-        allTrains={allTrains}
-        allRoutes={allRoutes}
-        allStations={allStations}
         userLocation={userLocation}
-        selectedStation={selectedStation}
-        setSelectedStation={setSelectedStation}
-        selectedRoute={selectedRoute}
-        setSelectedRoute={setSelectedRoute}
     />;
     
   return (
